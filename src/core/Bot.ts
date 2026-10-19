@@ -1,8 +1,11 @@
-import {Bot as GrammyBot, Context} from "grammy";
+import {Bot as GrammyBot, Context, session, SessionFlavor} from "grammy";
 import StartModule from "../modules/start/StartModule";
-import { EmojiFlavor, emojiParser } from "@grammyjs/emoji";
+import {EmojiFlavor, emojiParser} from "@grammyjs/emoji";
+import DateModule from "../modules/date/DateModule";
+import {SharedModule} from "../share/SharedModule";
+import {DateSession} from "../modules/date/domains/DateSession";
 
-export type MyContext = EmojiFlavor<Context>;
+export type MyContext = EmojiFlavor<Context> & SessionFlavor<DateSession>;
 
 export default class Bot {
 
@@ -13,17 +16,24 @@ export default class Bot {
     }
 
     private registerBotModule(): void {
-        const startModule = new StartModule();
+        const listModules: Set<SharedModule<MyContext>> = new Set([
+            new StartModule(),
+            new DateModule()
+        ]);
 
-        startModule.register(this.clientBot);
+        for (const module of listModules) {
+            module.register(this.clientBot);
+        }
 
         return undefined;
     }
 
     async startBot(): Promise<void> {
+        const dateSession = new DateModule();
         this.clientBot.use(emojiParser());
-        this.registerBotModule();
+        dateSession.session(this.clientBot);
 
+        this.registerBotModule();
         await this.clientBot.start();
     }
 }

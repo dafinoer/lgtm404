@@ -18,7 +18,7 @@ export default class Bot {
     private registerBotModule(): void {
         const listModules: Set<SharedModule<MyContext>> = new Set([
             new StartModule(),
-            new DateModule()
+            DateModule.create()
         ]);
 
         for (const module of listModules) {
@@ -29,7 +29,7 @@ export default class Bot {
     }
 
     async startBot(): Promise<void> {
-        const dateSession = new DateModule();
+        const dateSession = DateModule.create();
         this.clientBot.use(emojiParser());
         dateSession.session(this.clientBot);
 
